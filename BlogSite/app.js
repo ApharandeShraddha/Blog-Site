@@ -2,6 +2,8 @@
 var bodyParser  = require("body-parser"),
 mongoose        = require("mongoose"),
 express         = require("express"),
+methodOverride = require('method-override'),
+expressSanitizer = require("express-sanitizer"),
 app             = express();
 
 //Database Connection
@@ -11,6 +13,8 @@ mongoose.connect("mongodb://localhost/restful-blog-app" , {useMongoClient: true}
 app.set("view engine","ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended : true }));
+app.use(expressSanitizer());
+app.use(methodOverride('_method'));
 
 
 //Database Schema configuration
@@ -47,9 +51,8 @@ app.get("/blogs/new", function(req, res){
 });
 
 //CREATE Route
-
 app.post("/blogs", function(req, res){
-   // req.body.blog.body = req.sanitize(req.body.blog.body);
+   req.body.blog.body = req.sanitize(req.body.blog.body);
    var formData = req.body.blog;
    Blog.create(formData, function(err, newBlog){
        console.log(newBlog);
@@ -82,6 +85,29 @@ app.get("/blogs/:id/edit", function(req, res){
            res.render("edit", {blog: blog});
        }
    });
+});
+
+//UPDATE route
+app.put("/blogs/:id", function(req, res){
+   req.body.blog.body = req.sanitize(req.body.blog.body);
+   Blog.findByIdAndUpdate(req.params.id, req.body.blog, function(err, blog){
+       if(err){
+           console.log(err);
+       } else {
+         res.redirect("/blogs/" + blog._id);
+       }
+   });
+});
+
+//DESTROY route
+app.delete("/blogs/:id",function(req , res){
+     Blog.findByIdAndRemove(req.params.id, function(err, blog){
+       if(err){
+           console.log(err);
+       } else {
+           res.redirect("/blogs");
+       }
+   }); 
 });
 
 //route to main page

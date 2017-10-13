@@ -14,7 +14,11 @@
             	     </div>
 	            </div>
             </div>
-        </div>
+            <a href="/blogs/<%=blog._id%>/edit" class="ui blue button">Update Blog</a>
+             <form id="delete" action="/blogs/<%=blog._id%>?_method=DELETE"  method="POST" >
+                <button class="negative ui button" type="submit">Delete</button>
+            </form>
+        </div> 
         
     </div>
 
